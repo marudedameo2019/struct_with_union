@@ -7,16 +7,18 @@ struct result {
     union Value {
         R r;
         Error e;
+        Value(const R& r): r(r) {}     // 追加
+        Value(const Error& e): e(e) {} // 追加
     } v;
+    result(const R& r): success(true), v(r) {}      // 追加
+    result(const Error& e): success(false), v(e) {} // 追加
     operator bool() {return success;}
     R operator *() {return v.r;}
     Error error() {return v.e;}
 };
 result<double, string> idiv(int left, int right) {
-    result<double, string> r;
-    if (right == 0) {r.e = string("cannot divide by 0");}
-    else {r.r = static_cast<double>(left) / right;}
-    return r;
+    if (right == 0) {return string("cannot divide by 0");} // 変更
+    else {return static_cast<double>(left) / right;}       // 変更
 }
 int main() {
     auto r = idiv(1,3);
