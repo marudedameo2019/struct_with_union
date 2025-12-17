@@ -7,16 +7,21 @@ struct result {
     union Value {
         R r;
         Error e;
+        Value(){}                                     // 追加
         Value(const R& r): r(r) {}
         Value(const Error& e): e(e) {}
-        ~Value() {} // 追加: 外から正しく破棄すること
+        ~Value() {}
     } v;
     result(const R& r): success(true), v(r) {}
     result(const Error& e): success(false), v(e) {}
-    ~result() {                // 追加
-        if (success) v.r.~R(); // 追加
-        else v.e.~Error();     // 追加
-    }                          // 追加
+    result(const result& org): success(org.success) { // 追加
+        if (success) new (&v.r) R(org.v.r);           // 追加
+        else new (&v.e) Error(org.v.e);               // 追加
+    }                                                 // 追加
+    ~result() {
+        if (success) v.r.~R();
+        else v.e.~Error();
+    }
     operator bool() {return success;}
     R operator *() {return v.r;}
     Error error() {return v.e;}
